@@ -10,7 +10,6 @@ import {
 import type {
 	DeferredPromise,
 	ModalConfig,
-	ModalHocProps,
 	ModalLifecycleState,
 	ModalRef,
 } from "./types";
@@ -181,12 +180,9 @@ export const setFlags = (
  * }
  * ```
  */
-export function openModal<
-	TResult = unknown,
-	TData = Record<string, unknown>,
-	TProps extends Record<string, unknown> = Record<string, unknown>,
->(
-	modal: React.ComponentType<TProps & ModalHocProps>,
+export function openModal<TResult = unknown, TData = Record<string, unknown>>(
+	// biome-ignore lint/suspicious/noExplicitAny: Modal components have varying props types due to createModal HOC
+	modal: React.ComponentType<any>,
 	config?: ModalConfig<TData>,
 ): ModalRef<TResult, TData>;
 
@@ -196,7 +192,8 @@ export function openModal<TResult = unknown, TData = Record<string, unknown>>(
 ): ModalRef<TResult, TData>;
 
 export function openModal<TResult = unknown, TData = Record<string, unknown>>(
-	modal: React.ComponentType<Record<string, unknown>> | string,
+	// biome-ignore lint/suspicious/noExplicitAny: Implementation signature needs flexibility
+	modal: React.ComponentType<any> | string,
 	config: ModalConfig<TData> = {},
 ): ModalRef<TResult, TData> {
 	const modalId = config.modalId ?? getModalId(modal);

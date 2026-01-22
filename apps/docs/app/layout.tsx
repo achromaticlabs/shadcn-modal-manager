@@ -5,10 +5,10 @@ import type { ReactNode } from "react";
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | Modal Manager",
-    default: "Modal Manager",
+    template: "%s | Shadcn Modal Manager",
+    default: "Shadcn Modal Manager",
   },
-  description: "A lightweight, type-safe React modal manager",
+  description: "A lightweight, type-safe React modal management library",
 };
 
 interface LayoutProps {

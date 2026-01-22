@@ -1,6 +1,6 @@
 # shadcn-modal-manager
 
-A lightweight, type-safe, and animation-aware React modal manager. It features a promise-based API and pre-built adapters for popular UI libraries like Shadcn, Radix, and Base UI.
+Shadcn Modal Manager is a lightweight, type-safe, and animation-aware React modal management library. It features a promise-based API and pre-built adapters for popular UI libraries like Shadcn, Radix, and Base UI.
 
 ## Getting Started
 

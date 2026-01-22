@@ -38,7 +38,7 @@ function Root() {
 
 ### 2. Define a modal
 
-Use pre-built adapters to bridge your UI library with the modal manager logic.
+Use pre-built adapters to bridge your UI library with Shadcn Modal Manager.
 
 ```tsx
 import { ModalManager, useModal, shadcnUiDialog, shadcnUiDialogContent } from "shadcn-modal-manager";

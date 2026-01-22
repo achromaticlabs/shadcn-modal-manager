@@ -10,7 +10,7 @@ const Layout = ({ children }: LayoutProps) => (
   <DocsLayout
     tree={source.pageTree}
     nav={{
-      title: "Modal Manager",
+      title: "Shadcn Modal Manager",
     }}
   >
     {children}

@@ -3,7 +3,7 @@ title: Defining Modals
 description: Learn how to create and structure modals in your application
 ---
 
-In Modal Manager, modals are defined as regular React components wrapped with the `ModalManager.create` HOC. This wrapper handles registration, lifecycle events, and data injection.
+In Shadcn Modal Manager, modals are defined as regular React components wrapped with the `ModalManager.create` HOC. This wrapper handles registration, lifecycle events, and data injection.
 
 ## Creating a Modal Component
 
@@ -51,7 +51,7 @@ export const ConfirmationModal = ModalManager.create<ConfirmationProps>(
 ### Key Concepts
 
 1. **Typed Props**: The generic argument `<ConfirmationProps>` ensures type safety when opening the modal.
-2. **`useModal()`**: This hook connects your UI component (Dialog) to the modal manager's state (open/close).
+2. **`useModal()`**: This hook connects your UI component (Dialog) to Shadcn Modal Manager's state (open/close).
 3. **Adapters**: Helpers like `radixUiDialog(modal)` automatically wire up `open`, `onOpenChange`, and other props for specific UI libraries.
 
 ## Registration
