@@ -1,0 +1,146 @@
+---
+title: radixUiAlertDialog
+description: Adapter for Radix UI AlertDialog component
+---
+
+The `radixUiAlertDialog` and `radixUiAlertDialogContent` adapters work with [@radix-ui/react-alert-dialog](https://www.radix-ui.com/primitives/docs/components/alert-dialog).
+
+AlertDialog is designed for important confirmations that require explicit user action.
+
+
+
+## Usage
+
+```tsx
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@radix-ui/react-alert-dialog";
+import { ModalManager, useModal, radixUiAlertDialog, radixUiAlertDialogContent } from "shadcn-modal-manager";
+
+interface ConfirmProps {
+  title: string;
+  message: string;
+}
+
+const ConfirmModal = ModalManager.create<ConfirmProps>(({ title, message }) => {
+  const modal = useModal();
+
+  return (
+    <AlertDialog {...radixUiAlertDialog(modal)}>
+      <AlertDialogContent {...radixUiAlertDialogContent(modal)}>
+        <AlertDialogTitle>{title}</AlertDialogTitle>
+        <AlertDialogDescription>{message}</AlertDialogDescription>
+        <div className="flex gap-4 justify-end">
+          <AlertDialogCancel onClick={modal.dismiss}>
+            Cancel
+          </AlertDialogCancel>
+          <AlertDialogAction onClick={() => modal.close(true)}>
+            Confirm
+          </AlertDialogAction>
+        </div>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+});
+
+// Usage
+const confirmed = await ModalManager.open(ConfirmModal, {
+  data: { title: "Delete Item?", message: "This action cannot be undone." }
+}).afterClosed();
+
+if (confirmed) {
+  await deleteItem();
+}
+```
+
+## API
+
+### radixUiAlertDialog
+
+Returns props for the `AlertDialog` root.
+
+```tsx
+const props = radixUiAlertDialog(modal, options?);
+```
+
+**Returns:**
+| Prop | Type | Description |
+|------|------|-------------|
+| `open` | `boolean` | Whether the dialog is visible |
+| `onOpenChange` | `(open: boolean) => void` | Called when open state changes |
+
+### radixUiAlertDialogContent
+
+Returns props for `AlertDialogContent`.
+
+```tsx
+const props = radixUiAlertDialogContent(modal, options?);
+```
+
+**Returns:**
+| Prop | Type | Description |
+|------|------|-------------|
+| `onAnimationEndCapture` | `() => void` | Signals animation completion |
+| `onEscapeKeyDown` | `(e?: Event) => void` | Handles escape key |
+| `onPointerDownOutside` | `(e?: Event) => void` | Handles outside click |
+
+## Destructive Confirmation Pattern
+
+```tsx
+interface DeleteConfirmProps {
+  itemName: string;
+  onConfirm: () => Promise<void>;
+}
+
+const DeleteConfirmModal = ModalManager.create<DeleteConfirmProps>(({ itemName, onConfirm }) => {
+  const modal = useModal();
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await onConfirm();
+      modal.close(true);
+    } catch (error) {
+      setIsDeleting(false);
+    }
+  };
+
+  return (
+    <AlertDialog {...radixUiAlertDialog(modal, { disableClose: isDeleting })}>
+      <AlertDialogContent {...radixUiAlertDialogContent(modal, { disableClose: isDeleting })}>
+        <AlertDialogTitle>Delete {itemName}?</AlertDialogTitle>
+        <AlertDialogDescription>
+          This action cannot be undone. This will permanently delete the item.
+        </AlertDialogDescription>
+        <div className="flex gap-4 justify-end">
+          <AlertDialogCancel disabled={isDeleting} onClick={modal.dismiss}>
+            Cancel
+          </AlertDialogCancel>
+          <AlertDialogAction
+            disabled={isDeleting}
+            onClick={handleDelete}
+            className="bg-red-600"
+          >
+            {isDeleting ? "Deleting..." : "Delete"}
+          </AlertDialogAction>
+        </div>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+});
+```
+
+## Difference from Dialog
+
+| Feature | Dialog | AlertDialog |
+|---------|--------|-------------|
+| Purpose | General content | Important confirmations |
+| Escape key | Closes by default | Closes by default |
+| Outside click | Closes by default | Prevented by default |
+| Focus management | Standard | Forces focus on actions |

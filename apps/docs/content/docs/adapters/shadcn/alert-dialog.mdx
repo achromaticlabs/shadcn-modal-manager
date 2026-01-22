@@ -1,0 +1,214 @@
+---
+title: shadcnUiAlertDialog
+description: Adapter for Shadcn UI AlertDialog component
+---
+
+The `shadcnUiAlertDialog` adapter works with [Shadcn UI's AlertDialog](https://ui.shadcn.com/docs/components/alert-dialog) component.
+
+AlertDialog is designed for confirmations that require explicit user acknowledgment.
+
+
+
+## Usage
+
+```tsx
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alertDialog";
+import { ModalManager, useModal, shadcnUiAlertDialog, shadcnUiAlertDialogContent } from "shadcn-modal-manager";
+
+interface ConfirmProps {
+  title: string;
+  description: string;
+  confirmText?: string;
+  cancelText?: string;
+  destructive?: boolean;
+}
+
+const ConfirmModal = ModalManager.create<ConfirmProps>(({
+  title,
+  description,
+  confirmText = "Continue",
+  cancelText = "Cancel",
+  destructive = false,
+}) => {
+  const modal = useModal();
+
+  return (
+    <AlertDialog {...shadcnUiAlertDialog(modal)}>
+      <AlertDialogContent {...shadcnUiAlertDialogContent(modal)}>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={modal.dismiss}>
+            {cancelText}
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => modal.close(true)}
+            className={destructive ? "bg-destructive text-destructive-foreground" : ""}
+          >
+            {confirmText}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+});
+```
+
+## API
+
+### shadcnUiAlertDialog
+
+Returns props for the `AlertDialog` root.
+
+```tsx
+const props = shadcnUiAlertDialog(modal, options?);
+```
+
+**Returns:**
+| Prop | Type | Description |
+|------|------|-------------|
+| `open` | `boolean` | Whether the dialog is visible |
+| `onOpenChange` | `(open: boolean) => void` | For AlertDialog root |
+| `onClose` | `() => void` | For close handling |
+| `onAnimationEndCapture` | `() => void` | For animations |
+
+### shadcnUiAlertDialogContent
+
+Returns props for `AlertDialogContent`.
+
+```tsx
+const props = shadcnUiAlertDialogContent(modal, options?);
+```
+
+## Reusable Confirm Helper
+
+Create a utility function for common confirmations:
+
+```tsx
+// lib/confirm.ts
+import { ModalManager } from "shadcn-modal-manager";
+import { ConfirmModal } from "@/components/modals/confirm-modal";
+
+export async function confirm(options: {
+  title: string;
+  description: string;
+  confirmText?: string;
+  cancelText?: string;
+  destructive?: boolean;
+}): Promise<boolean> {
+  const result = await ModalManager.open(ConfirmModal, { data: options }).afterClosed();
+  return result === true;
+}
+
+// Usage anywhere in your app
+const shouldDelete = await confirm({
+  title: "Delete Item",
+  description: "Are you sure? This action cannot be undone.",
+  confirmText: "Delete",
+  destructive: true,
+});
+
+if (shouldDelete) {
+  await deleteItem();
+}
+```
+
+## Delete Confirmation Pattern
+
+```tsx
+interface DeleteConfirmProps {
+  itemName: string;
+  itemType: string;
+}
+
+const DeleteConfirmModal = ModalManager.create<DeleteConfirmProps>(({ itemName, itemType }) => {
+  const modal = useModal();
+
+  return (
+    <AlertDialog {...shadcnUiAlertDialog(modal)}>
+      <AlertDialogContent {...shadcnUiAlertDialogContent(modal)}>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete {itemType}?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This will permanently delete <strong>{itemName}</strong>.
+            This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={modal.dismiss}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => modal.close(true)}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+});
+
+// Usage
+const onDelete = async (project: Project) => {
+  const confirmed = await ModalManager.open(DeleteConfirmModal, {
+    data: { itemName: project.name, itemType: "project" }
+  }).afterClosed();
+
+  if (confirmed) {
+    await deleteProject(project.id);
+    toast.success("Project deleted");
+  }
+};
+```
+
+## With Async Action
+
+```tsx
+const AsyncConfirmModal = ModalManager.create<{ action: () => Promise<void> }>(({ action }) => {
+  const modal = useModal();
+  const [isPending, setIsPending] = useState(false);
+
+  const handleConfirm = async () => {
+    setIsPending(true);
+    try {
+      await action();
+      modal.close(true);
+    } catch (error) {
+      setIsPending(false);
+      // Handle error
+    }
+  };
+
+  return (
+    <AlertDialog {...shadcnUiAlertDialog(modal, { disableClose: isPending })}>
+      <AlertDialogContent {...shadcnUiAlertDialogContent(modal, { disableClose: isPending })}>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Confirm Action</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to proceed?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={modal.dismiss} disabled={isPending}>
+            Cancel
+          </AlertDialogCancel>
+          <AlertDialogAction onClick={handleConfirm} disabled={isPending}>
+            {isPending ? "Processing..." : "Confirm"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+});
+```

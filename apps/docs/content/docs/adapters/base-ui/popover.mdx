@@ -1,0 +1,103 @@
+---
+title: baseUiPopover
+description: Adapter for Base UI Popover component
+---
+
+The `baseUiPopover`, `baseUiPopoverPortal`, and `baseUiPopoverPopup` adapters work with [Base UI](https://base-ui.com/)'s Popover component.
+
+
+## Usage
+
+Popovers are often used for small overlays triggered by specific elements.
+
+```tsx
+import { Popover } from "@base-ui-components/react/popover";
+import {
+  ModalManager,
+  useModal,
+  baseUiPopover,
+  baseUiPopoverPortal,
+  baseUiPopoverPopup,
+} from "shadcn-modal-manager";
+
+const UserMenu = ModalManager.create(() => {
+  const modal = useModal();
+
+  return (
+    <Popover.Root {...baseUiPopover(modal)}>
+      <Popover.Portal {...baseUiPopoverPortal(modal)}>
+        <Popover.Positioner side="bottom" align="end" sideOffset={8}>
+          <Popover.Popup
+            {...baseUiPopoverPopup(modal)}
+            className="w-48 bg-white rounded-lg shadow-lg border p-1 outline-none data-[entering]:animate-in data-[exiting]:animate-out data-[entering]:fade-in-0 data-[entering]:zoom-in-95 data-[exiting]:fade-out-0 data-[exiting]:zoom-out-95"
+          >
+            <div className="flex flex-col">
+              <button 
+                className="px-3 py-2 text-sm text-left hover:bg-gray-100 rounded"
+                onClick={() => modal.close("profile")}
+              >
+                Profile
+              </button>
+              <button 
+                className="px-3 py-2 text-sm text-left hover:bg-gray-100 rounded"
+                onClick={() => modal.close("settings")}
+              >
+                Settings
+              </button>
+              <hr className="my-1" />
+              <button 
+                className="px-3 py-2 text-sm text-left hover:bg-gray-100 rounded text-red-600"
+                onClick={() => modal.close("logout")}
+              >
+                Logout
+              </button>
+            </div>
+          </Popover.Popup>
+        </Popover.Positioner>
+      </Popover.Portal>
+    </Popover.Root>
+  );
+});
+```
+
+## API
+
+### baseUiPopover
+
+Returns props for the `Popover.Root` component.
+
+```tsx
+const props = baseUiPopover(modal, options?);
+```
+
+**Returns:**
+| Prop | Type | Description |
+|------|------|-------------|
+| `open` | `boolean` | Whether the popover is visible |
+| `onOpenChange` | `(open: boolean) => void` | Called when open state changes |
+
+### baseUiPopoverPortal
+
+Returns props for the `Popover.Portal` component.
+
+```tsx
+const props = baseUiPopoverPortal(modal);
+```
+
+**Returns:**
+| Prop | Type | Description |
+|------|------|-------------|
+| `keepMounted` | `boolean` | Keep portal mounted when closed |
+
+### baseUiPopoverPopup
+
+Returns props for the `Popover.Popup` component.
+
+```tsx
+const props = baseUiPopoverPopup(modal);
+```
+
+**Returns:**
+| Prop | Type | Description |
+|------|------|-------------|
+| `onAnimationEnd` | `() => void` | Signals animation completion |

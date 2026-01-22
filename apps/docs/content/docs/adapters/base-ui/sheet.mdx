@@ -1,0 +1,79 @@
+---
+title: baseUiSheet
+description: Adapter for Base UI Sheet (Side Panel) patterns
+---
+
+The `baseUiSheet`, `baseUiSheetPortal`, and `baseUiSheetPopup` adapters are commonly used to implement side panels and drawers.
+
+[Base UI](https://base-ui.com/) uses the Dialog primitive for all modal-like structures, including sheets.
+
+
+## Usage
+
+To create a sheet, style the `Dialog.Popup` with side-anchored positions and sliding animations.
+
+```tsx
+import { Dialog } from "@base-ui-components/react/dialog";
+import {
+  ModalManager,
+  useModal,
+  baseUiSheet,
+  baseUiSheetPortal,
+  baseUiSheetPopup,
+} from "shadcn-modal-manager";
+
+const SettingsSheet = ModalManager.create(() => {
+  const modal = useModal();
+
+  return (
+    <Dialog.Root {...baseUiSheet(modal)}>
+      <Dialog.Portal {...baseUiSheetPortal(modal)}>
+        <Dialog.Backdrop className="fixed inset-0 bg-black/50 data-[closed]:opacity-0 transition-opacity" />
+        <Dialog.Popup
+          {...baseUiSheetPopup(modal)}
+          className="fixed inset-y-0 right-0 w-80 bg-white p-6 shadow-xl outline-none data-[entering]:animate-in data-[exiting]:animate-out data-[entering]:slide-in-from-right data-[exiting]:slide-out-to-right"
+        >
+          <Dialog.Title className="text-xl font-bold">Settings</Dialog.Title>
+          <div className="mt-8 space-y-4">
+            <p className="text-gray-600">Side sheet content goes here.</p>
+          </div>
+          <div className="absolute bottom-6 left-6 right-6">
+            <button 
+              onClick={modal.dismiss} 
+              className="w-full py-2 bg-black text-white rounded font-medium"
+            >
+              Close
+            </button>
+          </div>
+        </Dialog.Popup>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+});
+```
+
+## API
+
+### baseUiSheet
+
+Returns props for the `Dialog.Root` component.
+
+```tsx
+const props = baseUiSheet(modal, options?);
+```
+
+### baseUiSheetPortal
+
+Returns props for the `Dialog.Portal` component.
+
+```tsx
+const props = baseUiSheetPortal(modal);
+```
+
+### baseUiSheetPopup
+
+Returns props for the `Dialog.Popup` component.
+
+```tsx
+const props = baseUiSheetPopup(modal);
+```

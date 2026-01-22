@@ -1,0 +1,57 @@
+---
+title: Hooks
+description: Hooks for interacting with the modal system
+---
+
+## useModal()
+
+The primary hook for controlling a modal instance. Can be used inside the modal component or with a reference to control a specific modal.
+
+```tsx
+// Inside a modal
+const modal = useModal();
+
+// Outside (controlling specific modal)
+const modal = useModal("modal-id");
+const modal = useModal(ModalComponent);
+```
+
+### Returns `ModalHandler`
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `isOpen` | `boolean` | Whether the modal is open |
+| `open` | `(data?) => Promise` | Function to open the modal |
+| `close` | `(result?) => void` | Function to close the modal |
+| `dismiss` | `() => void` | Function to dismiss without result |
+| `modalId` | `string` | The unique ID of this modal |
+| `data` | `TData` | Current data passed to modal |
+
+---
+
+## useModalData()
+
+Retrieves the typed data passed to the modal via `open()`. Must be used inside a modal component.
+
+```tsx
+function useModalData<TData>(): TData | undefined
+```
+
+### Example
+
+```tsx
+const content = useModalData<{ message: string }>();
+return <p>{content?.message}</p>;
+```
+
+---
+
+## useModalConfig()
+
+Retrieves the configuration flags for the current modal.
+
+```tsx
+function useModalConfig(): InternalModalConfig
+```
+
+Returns object containing `disableClose`, `keepMounted` etc.

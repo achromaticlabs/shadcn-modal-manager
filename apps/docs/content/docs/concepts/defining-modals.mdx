@@ -1,0 +1,101 @@
+---
+title: Defining Modals
+description: Learn how to create and structure modals in your application
+---
+
+In Modal Manager, modals are defined as regular React components wrapped with the `ModalManager.create` HOC. This wrapper handles registration, lifecycle events, and data injection.
+
+## Creating a Modal Component
+
+Use `ModalManager.create` to wrap your component. You can define the props your modal expects.
+
+```tsx
+import { ModalManager, useModal, shadcnUiDialog, shadcnUiDialogContent } from "shadcn-modal-manager";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+
+// 1. Define the props (data) that will be passed when opening
+interface ConfirmationProps {
+  title: string;
+  description: string;
+  onConfirm: () => void;
+}
+
+// 2. Create the modal component
+export const ConfirmationModal = ModalManager.create<ConfirmationProps>(
+  ({ title, description, onConfirm }) => {
+    // 3. Use the hook to control this specific modal instance
+    const modal = useModal();
+
+    return (
+      <Dialog {...shadcnUiDialog(modal)}>
+        <DialogContent {...shadcnUiDialogContent(modal)}>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
+          
+          <div className="flex gap-2 justify-end">
+            <button onClick={modal.dismiss}>Cancel</button>
+            <button onClick={() => {
+              onConfirm();
+              modal.close(true); // Close with result
+            }}>
+              Confirm
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+);
+```
+
+### Key Concepts
+
+1. **Typed Props**: The generic argument `<ConfirmationProps>` ensures type safety when opening the modal.
+2. **`useModal()`**: This hook connects your UI component (Dialog) to the modal manager's state (open/close).
+3. **Adapters**: Helpers like `radixUiDialog(modal)` automatically wire up `open`, `onOpenChange`, and other props for specific UI libraries.
+
+## Registration
+
+Modals are automatically registered in the global registry when they are first used or imported. You don't need a central "modal registry" file.
+
+ However, if you want to explicitly register a modal (e.g., for opening by string ID), you can use `<ModalDefinition>`.
+
+### Declarative Registration
+
+You can place `<ModalDefinition>` anywhere in your app tree, usually near where it's used or in a global layout.
+
+```tsx
+// layout.tsx
+import { ModalDefinition } from "shadcn-modal-manager";
+
+<ModalDefinition component={ConfirmationModal} id="global-confirm" />
+```
+
+Then open it by ID:
+
+```tsx
+ModalManager.open("global-confirm", { ... });
+```
+
+## Wrapping UI Libraries
+
+The library is headless, meaning you bring your own UI components (Radix, Shadcn, Base UI, or plain HTML).
+
+### Using Native HTML
+
+```tsx
+const SimpleModal = ModalManager.create(() => {
+  const modal = useModal();
+  
+  if (!modal.isOpen) return null;
+
+  return (
+    <div className="modal-overlay">
+      <div className="modal-content" onAnimationEnd={modal.onAnimationEnd}>
+        <h1>My Modal</h1>
+      </div>
+    </div>
+  );
+});
+```
+*Note: When using custom implementations, remember to call `modal.onAnimationEnd` to ensure lifecycle promises resolve correctly.*

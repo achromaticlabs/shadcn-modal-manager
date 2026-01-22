@@ -1,0 +1,82 @@
+---
+title: Control Flow
+description: Managing modal lifecycle, return values, and promises
+---
+
+Controlling modals involves opening them, passing data, waiting for user interaction, and handling the result.
+
+## Opening Modals
+
+Use `ModalManager.open()` to show a modal. You must pass the component and any required data.
+
+```tsx
+import { ModalManager } from "shadcn-modal-manager";
+import { EditUserModal } from "./edit-user-modal";
+
+// Basic open
+const modalRef = ModalManager.open(EditProfileModal, {
+  data: { userId: "user_123" }
+});
+```
+
+### Returning Data (Promises)
+
+The library uses a promise-based API to handle user interactions. This eliminates the need for complex callback props or global state management for simple inputs.
+
+```tsx
+// 1. Open the modal
+const ref = ModalManager.open(ConfirmationModal, { 
+  data: { title: "Delete Item?" } 
+});
+
+// 2. Await the result (resolves when modal.close(result) is called)
+const result = await ref.afterClosed();
+
+if (result === true) {
+  // User confirmed
+  await deleteItem();
+}
+```
+
+In the modal component:
+
+```tsx
+// Pass the result to .close()
+<button onClick={() => modal.close(true)}>Confirm</button>
+<button onClick={() => modal.close(false)}>Cancel</button>
+```
+
+## Closing Modals
+
+### Programmatic Closing
+
+You can close a modal from the reference returned by `open()`:
+
+```tsx
+const ref = ModalManager.open(LoadingModal);
+// ... operations ...
+ref.close(); // Close it
+```
+
+### Closing All
+
+Useful for route changes or logout actions:
+
+```tsx
+import { ModalManager } from "shadcn-modal-manager";
+
+// Close everything immediately
+await ModalManager.closeAll();
+```
+
+## Waiting for Animations
+
+Sometimes you need to wait for the opening animation to finish (e.g., to focus an input manually or start a subsequent animation).
+
+```tsx
+const ref = ModalManager.open(MyModal);
+
+// Wait until fully visible
+await ref.afterOpened();
+console.log("Modal is now fully visible on screen");
+```

@@ -1,0 +1,25 @@
+{
+	"name": "shadcn-modal-manager-monorepo",
+	"private": true,
+	"version": "0.0.0",
+	"scripts": {
+		"dev": "npm run dev --workspace=apps/docs",
+		"build": "npm run build -w shadcn-modal-manager && npm run build -w docs",
+		"test": "npm run test --workspace=packages/shadcn-modal-manager",
+		"lint": "npm run lint --workspaces --if-present",
+		"typecheck": "npm run typecheck --workspaces --if-present",
+		"changeset": "changeset",
+		"changeset:version": "changeset version",
+		"changeset:publish": "npm run build --workspace=packages/shadcn-modal-manager && changeset publish",
+		"prepare": "husky || true",
+		"postinstall": "npm run build -w shadcn-modal-manager"
+	},
+	"workspaces": [
+		"packages/*",
+		"apps/*"
+	],
+	"devDependencies": {
+		"@changesets/cli": "2.29.8",
+		"husky": "9.1.7"
+	}
+}

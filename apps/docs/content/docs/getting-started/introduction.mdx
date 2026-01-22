@@ -1,0 +1,66 @@
+---
+title: Introduction
+description: A lightweight, type-safe React modal manager
+---
+
+Modal Manager provides a simple, declarative way to manage modals in your React application. It handles the complexity of modal state, animations, and lifecycle so you can focus on building great user experiences.
+
+## Features
+
+- **Type-safe** - Full TypeScript support with generics for modal data
+- **Promise-based API** - `ModalManager.open()` returns promises for `afterOpened()` and `afterClosed()`
+- **Animation-aware** - Properly handles enter/exit animations before cleanup
+- **Adapter pattern** - Pre-built adapters for Shadcn, Radix UI and Base UI
+- **Lightweight** - Zero dependencies beyond React
+
+## Quick Example
+
+```tsx
+import { ModalManager, useModal, shadcnUiDialog, shadcnUiDialogContent } from "shadcn-modal-manager";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+
+// Define your modal
+const ConfirmModal = ModalManager.create<{ message: string }>(({ message }) => {
+  const modal = useModal();
+
+  return (
+    <Dialog {...shadcnUiDialog(modal)}>
+      <DialogContent {...shadcnUiDialogContent(modal)}>
+        <DialogHeader>
+          <DialogTitle>Confirm Action</DialogTitle>
+        </DialogHeader>
+        <p>{message}</p>
+        <DialogFooter>
+           <Button variant="outline" onClick={modal.dismiss}>Cancel</Button>
+           <Button onClick={() => modal.close(true)}>Confirm</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+});
+
+// Use it anywhere
+const modalRef = ModalManager.open(ConfirmModal, {
+  data: { message: "Are you sure?" }
+});
+
+const result = await modalRef.afterClosed();
+
+if (result) {
+  // User confirmed
+}
+```
+
+## Why Modal Manager?
+
+Managing modals in React applications often leads to scattered state, prop drilling, and complex lifecycle handling. Modal Manager solves these problems by:
+
+1. **Centralizing modal state** - All modals are managed through a single provider
+2. **Enabling programmatic control** - Open modals from anywhere with `ModalManager.open()`
+3. **Handling animations correctly** - Waits for exit animations before unmounting
+4. **Supporting async workflows** - Get results from modals via promises
+
+## Getting Started
+
+Ready to get started? Check out the [installation guide](/docs/getting-started/installation) or jump straight to the [quick start](/docs/getting-started/quickstart).

@@ -1,0 +1,203 @@
+---
+title: shadcnUiDrawer
+description: Adapter for Shadcn UI Drawer component
+---
+
+The `shadcnUiDrawer` and `shadcnUiDrawerContent` adapters work with [Shadcn UI's Drawer](https://ui.shadcn.com/docs/components/drawer) component.
+
+Shadcn's Drawer is built on [Vaul](https://vaul.emilkowal.ski/), providing a mobile-friendly bottom sheet with drag-to-dismiss.
+
+
+
+## Usage
+
+```tsx
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerFooter,
+} from "@/components/ui/drawer";
+import { Button } from "@/components/ui/button";
+import { ModalManager, useModal, shadcnUiDrawer, shadcnUiDrawerContent, shadcnUiDialog, shadcnUiDialogContent } from "shadcn-modal-manager";
+
+const OptionsDrawer = ModalManager.create(() => {
+  const modal = useModal();
+  return (
+    <Drawer {...shadcnUiDrawer(modal)}>
+      <DrawerContent {...shadcnUiDrawerContent(modal)}>
+        <DrawerHeader>
+          <DrawerTitle>Options</DrawerTitle>
+          <DrawerDescription>Select an option below.</DrawerDescription>
+        </DrawerHeader>
+        <div className="p-4">
+          <Button className="w-full" onClick={() => modal.close("share")}>
+            Share
+          </Button>
+          <Button className="w-full mt-2" onClick={() => modal.close("edit")}>
+            Edit
+          </Button>
+          <Button className="w-full mt-2" variant="destructive" onClick={() => modal.close("delete")}>
+            Delete
+          </Button>
+        </div>
+        <DrawerFooter>
+          <Button variant="outline" onClick={modal.dismiss}>Cancel</Button>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
+  );
+});
+```
+
+## API
+
+### shadcnUiDrawer
+
+Returns props for the Drawer root.
+
+```tsx
+const props = shadcnUiDrawer(modal, options?);
+```
+
+**Returns:**
+| Prop | Type | Description |
+|------|------|-------------|
+| `open` | `boolean` | Whether the drawer is visible |
+| `onOpenChange` | `(open: boolean) => void` | For Drawer root |
+| `dismissible` | `boolean` | Whether drag-to-dismiss is enabled |
+
+### shadcnUiDrawerContent
+
+Returns props for DrawerContent.
+
+```tsx
+const props = shadcnUiDrawerContent(modal);
+```
+
+**Returns:**
+| Prop | Type | Description |
+|------|------|-------------|
+| `onAnimationEnd` | `() => void` | Signals animation completion |
+
+## Mobile Action Sheet
+
+```tsx
+interface ActionSheetProps {
+  actions: Array<{
+    label: string;
+    value: string;
+    destructive?: boolean;
+  }>;
+}
+
+const ActionSheet = ModalManager.create<ActionSheetProps>(({ actions }) => {
+  const modal = useModal();
+  return (
+    <Drawer {...shadcnUiDrawer(modal)}>
+      <DrawerContent {...shadcnUiDrawerContent(modal)}>
+        <div className="p-4 pb-8">
+          {actions.map((action) => (
+            <Button
+              key={action.value}
+              variant={action.destructive ? "destructive" : "ghost"}
+              className="w-full justify-start h-12 text-lg"
+              onClick={() => modal.close(action.value)}
+            >
+              {action.label}
+            </Button>
+          ))}
+        </div>
+        <DrawerFooter className="border-t pt-4">
+          <Button variant="outline" onClick={modal.dismiss}>
+            Cancel
+          </Button>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
+  );
+});
+
+// Usage
+const action = await ModalManager.open(ActionSheet, {
+  data: {
+    actions: [
+      { label: "Share", value: "share" },
+      { label: "Edit", value: "edit" },
+      { label: "Delete", value: "delete", destructive: true },
+    ],
+  },
+}).afterClosed();
+
+if (action === "delete") {
+  // Handle delete
+}
+```
+
+## Form in Drawer
+
+```tsx
+const FormDrawer = ModalManager.create(() => {
+  const modal = useModal();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  return (
+    <Drawer {...shadcnUiDrawer(modal, { disableClose: isSubmitting })}>
+      <DrawerContent {...shadcnUiDrawerContent(modal)}>
+        <DrawerHeader>
+          <DrawerTitle>Add Item</DrawerTitle>
+        </DrawerHeader>
+        <form onSubmit={handleSubmit} className="p-4">
+          <Input placeholder="Name" className="mb-4" />
+          <DrawerFooter className="px-0">
+            <Button type="button" variant="outline" onClick={modal.dismiss} disabled={isSubmitting}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : "Save"}
+            </Button>
+          </DrawerFooter>
+        </form>
+      </DrawerContent>
+    </Drawer>
+  );
+});
+```
+
+## Responsive Dialog/Drawer
+
+Use a drawer on mobile and dialog on desktop:
+
+```tsx
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+
+const ResponsiveModal = ModalManager.create(() => {
+  const modal = useModal();
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+
+  if (isDesktop) {
+    return (
+      <Dialog {...shadcnUiDialog(modal)}>
+        <DialogContent {...shadcnUiDialogContent(modal)}>
+          <DialogHeader>
+            <DialogTitle>Edit Profile</DialogTitle>
+          </DialogHeader>
+          {/* Content */}
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  return (
+    <Drawer {...shadcnUiDrawer(modal)}>
+      <DrawerContent {...shadcnUiDrawerContent(modal)}>
+        <DrawerHeader>
+          <DrawerTitle>Edit Profile</DrawerTitle>
+        </DrawerHeader>
+        {/* Content */}
+      </DrawerContent>
+    </Drawer>
+  );
+});
+```

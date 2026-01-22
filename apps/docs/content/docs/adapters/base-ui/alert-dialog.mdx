@@ -1,0 +1,82 @@
+---
+title: baseUiAlertDialog
+description: Adapter for Base UI AlertDialog component
+---
+
+The `baseUiAlertDialog`, `baseUiAlertDialogPortal`, and `baseUiAlertDialogPopup` adapters work with [Base UI](https://base-ui.com/)'s AlertDialog component.
+
+Base UI AlertDialog uses the same architecture as the standard Dialog but with additional accessibility focus for confirmation workflows.
+
+
+## Usage
+
+```tsx
+import { AlertDialog } from "@base-ui-components/react/alert-dialog";
+import {
+  ModalManager,
+  useModal,
+  baseUiAlertDialog,
+  baseUiAlertDialogPortal,
+  baseUiAlertDialogPopup,
+} from "shadcn-modal-manager";
+
+const ConfirmDelete = ModalManager.create(() => {
+  const modal = useModal();
+
+  return (
+    <AlertDialog.Root {...baseUiAlertDialog(modal)}>
+      <AlertDialog.Portal {...baseUiAlertDialogPortal(modal)}>
+        <AlertDialog.Backdrop className="fixed inset-0 bg-black/50" />
+        <AlertDialog.Popup
+          {...baseUiAlertDialogPopup(modal)}
+          className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg shadow-xl"
+        >
+          <AlertDialog.Title className="text-lg font-bold">
+            Delete Item
+          </AlertDialog.Title>
+          <AlertDialog.Description className="text-gray-500 mt-2">
+            This action cannot be undone. Are you sure you want to proceed?
+          </AlertDialog.Description>
+          <div className="mt-6 flex gap-3 justify-end">
+            <button onClick={modal.dismiss} className="px-4 py-2 border rounded">
+              Cancel
+            </button>
+            <button
+              onClick={() => modal.close(true)}
+              className="px-4 py-2 bg-red-600 text-white rounded font-medium"
+            >
+              Delete
+            </button>
+          </div>
+        </AlertDialog.Popup>
+      </AlertDialog.Portal>
+    </AlertDialog.Root>
+  );
+});
+```
+
+## API
+
+### baseUiAlertDialog
+
+Returns props for the `AlertDialog.Root` component.
+
+```tsx
+const props = baseUiAlertDialog(modal, options?);
+```
+
+### baseUiAlertDialogPortal
+
+Returns props for the `AlertDialog.Portal` component.
+
+```tsx
+const props = baseUiAlertDialogPortal(modal);
+```
+
+### baseUiAlertDialogPopup
+
+Returns props for the `AlertDialog.Popup` component.
+
+```tsx
+const props = baseUiAlertDialogPopup(modal);
+```

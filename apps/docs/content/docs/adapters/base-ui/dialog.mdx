@@ -1,0 +1,197 @@
+---
+title: baseUiDialog
+description: Adapter for Base UI Dialog component
+---
+
+The `baseUiDialog`, `baseUiDialogPortal`, and `baseUiDialogPopup` adapters work with [Base UI](https://base-ui.com/) (formerly MUI Base).
+
+Base UI provides unstyled, accessible components with CSS data attributes for animations.
+
+
+## Usage
+
+```tsx
+import { Dialog } from "@base-ui-components/react/dialog";
+import {
+  ModalManager,
+  useModal,
+  baseUiDialog,
+  baseUiDialogPortal,
+  baseUiDialogPopup,
+} from "shadcn-modal-manager";
+
+const MyModal = ModalManager.create(() => {
+  const modal = useModal();
+
+  return (
+    <Dialog.Root {...baseUiDialog(modal)}>
+      <Dialog.Portal {...baseUiDialogPortal(modal)}>
+        <Dialog.Backdrop className="fixed inset-0 bg-black/50 data-[closed]:opacity-0 transition-opacity" />
+        <Dialog.Popup
+          {...baseUiDialogPopup(modal)}
+          className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg shadow-xl"
+        >
+          <Dialog.Title className="text-lg font-semibold">
+            Modal Title
+          </Dialog.Title>
+          <Dialog.Description className="text-gray-600 mt-2">
+            Modal description goes here.
+          </Dialog.Description>
+          <div className="mt-6 flex gap-2 justify-end">
+            <button onClick={modal.dismiss} className="px-4 py-2 border rounded">
+              Cancel
+            </button>
+            <button onClick={() => modal.close(true)} className="px-4 py-2 bg-blue-500 text-white rounded">
+              Confirm
+            </button>
+          </div>
+        </Dialog.Popup>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+});
+```
+
+## API
+
+### baseUiDialog
+
+Returns props for the `Dialog.Root` component.
+
+```tsx
+const props = baseUiDialog(modal, options?);
+```
+
+**Returns:**
+| Prop | Type | Description |
+|------|------|-------------|
+| `open` | `boolean` | Whether the dialog is visible |
+| `onOpenChange` | `(open: boolean) => void` | Called when open state changes |
+| `dismissible` | `boolean` | Whether clicking outside/escape closes |
+
+### baseUiDialogPortal
+
+Returns props for the `Dialog.Portal` component.
+
+```tsx
+const props = baseUiDialogPortal(modal);
+```
+
+**Returns:**
+| Prop | Type | Description |
+|------|------|-------------|
+| `keepMounted` | `boolean` | Keep portal mounted when closed |
+
+### baseUiDialogPopup
+
+Returns props for the `Dialog.Popup` component.
+
+```tsx
+const props = baseUiDialogPopup(modal);
+```
+
+**Returns:**
+| Prop | Type | Description |
+|------|------|-------------|
+| `onAnimationEnd` | `() => void` | Signals animation completion |
+
+## CSS Data Attributes
+
+Base UI uses data attributes for styling states:
+
+| Attribute | Description |
+|-----------|-------------|
+| `data-open` | Present when dialog is open |
+| `data-closed` | Present when dialog is closed |
+| `data-entering` | Present during enter animation |
+| `data-exiting` | Present during exit animation |
+
+```css
+/* Backdrop animations */
+.backdrop {
+  transition: opacity 200ms;
+}
+
+.backdrop[data-closed] {
+  opacity: 0;
+}
+
+/* Popup animations */
+.popup {
+  transition: opacity 200ms, transform 200ms;
+}
+
+.popup[data-entering] {
+  animation: fadeIn 200ms ease-out;
+}
+
+.popup[data-exiting] {
+  animation: fadeOut 200ms ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+}
+```
+
+## With Tailwind CSS
+
+Using Tailwind's arbitrary variants:
+
+```tsx
+<Dialog.Backdrop
+  className="
+    fixed inset-0 bg-black/50
+    transition-opacity duration-200
+    data-[closed]:opacity-0
+  "
+/>
+<Dialog.Popup
+  {...baseUiDialogPopup(modal)}
+  className="
+    fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
+    bg-white p-6 rounded-lg shadow-xl
+    data-[entering]:animate-in data-[entering]:fade-in-0 data-[entering]:zoom-in-95
+    data-[exiting]:animate-out data-[exiting]:fade-out-0 data-[exiting]:zoom-out-95
+  "
+/>
+```
+
+## Keep Mounted
+
+The `baseUiDialogPortal` adapter respects `keepMounted` from the modal:
+
+```tsx
+// Open with keepMounted
+ModalManager.open(MyModal, { keepMounted: true });
+
+// The portal will stay in the DOM after closing
+// Useful for preserving form state or heavy components
+```
+
+## Compared to Radix
+
+| Feature | Radix UI | Base UI |
+|---------|----------|---------|
+| Styling | CSS/className | Data attributes |
+| Animation detection | `onAnimationEndCapture` | `onAnimationEnd` |
+| Portal | Automatic | Explicit `Dialog.Portal` |
+| Keep mounted | Via adapter | Via `Dialog.Portal` prop |

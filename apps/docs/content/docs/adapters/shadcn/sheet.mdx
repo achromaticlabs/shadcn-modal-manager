@@ -1,0 +1,202 @@
+---
+title: shadcnUiSheet
+description: Adapter for Shadcn UI Sheet component
+---
+
+The `shadcnUiSheet` adapter works with [Shadcn UI's Sheet](https://ui.shadcn.com/docs/components/sheet) component.
+
+Sheets are side panels that slide in from the edge of the screen.
+
+
+## Usage
+
+```tsx
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { ModalManager, useModal, shadcnUiSheet, shadcnUiSheetContent } from "shadcn-modal-manager";
+
+const SettingsSheet = ModalManager.create(() => {
+  const modal = useModal();
+
+  return (
+    <Sheet {...shadcnUiSheet(modal)}>
+      <SheetContent {...shadcnUiSheetContent(modal)}>
+        <SheetHeader>
+          <SheetTitle>Settings</SheetTitle>
+          <SheetDescription>
+            Configure your preferences here.
+          </SheetDescription>
+        </SheetHeader>
+        <div className="py-4">
+          {/* Settings form */}
+        </div>
+        <SheetFooter>
+          <Button variant="outline" onClick={modal.dismiss}>Cancel</Button>
+          <Button onClick={() => modal.close({ saved: true })}>Save</Button>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
+  );
+});
+```
+
+## API
+
+### shadcnUiSheet
+
+Returns all props needed for both Sheet and SheetContent.
+
+```tsx
+const props = shadcnUiSheet(modal, options?);
+```
+
+**Returns:**
+| Prop | Type | Description |
+|------|------|-------------|
+| `open` | `boolean` | Whether the sheet is visible |
+| `onOpenChange` | `(open: boolean) => void` | For Sheet root |
+| `onClose` | `() => void` | For close handling |
+| `onAnimationEndCapture` | `() => void` | For animations |
+
+### shadcnUiSheetContent
+
+Returns all props needed for SheetContent.
+
+```tsx
+const props = shadcnUiSheetContent(modal, options?);
+```
+
+## Sheet Sides
+
+Shadcn Sheet supports different sides via the `side` prop:
+
+```tsx
+const RightSheet = ModalManager.create(() => {
+  const modal = useModal();
+
+  return (
+    <Sheet {...shadcnUiSheet(modal)}>
+      <SheetContent side="right">
+        {/* Content */}
+      </SheetContent>
+    </Sheet>
+  );
+});
+
+const LeftSheet = ModalManager.create(() => {
+  const modal = useModal();
+
+  return (
+    <Sheet {...shadcnUiSheet(modal)}>
+      <SheetContent side="left">
+        {/* Navigation */}
+      </SheetContent>
+    </Sheet>
+  );
+});
+
+const BottomSheet = ModalManager.create(() => {
+  const modal = useModal();
+
+  return (
+    <Sheet {...shadcnUiSheet(modal)}>
+      <SheetContent side="bottom">
+        {/* Mobile menu */}
+      </SheetContent>
+    </Sheet>
+  );
+});
+```
+
+## Mobile Navigation
+
+```tsx
+interface NavSheetProps {
+  currentPath: string;
+}
+
+const NavSheet = ModalManager.create<NavSheetProps>(({ currentPath }) => {
+  const modal = useModal();
+
+  const links = [
+    { href: "/", label: "Home", icon: Home },
+    { href: "/products", label: "Products", icon: Package },
+    { href: "/about", label: "About", icon: Info },
+    { href: "/contact", label: "Contact", icon: Mail },
+  ];
+
+  return (
+    <Sheet {...shadcnUiSheet(modal)}>
+      <SheetContent side="left" className="w-[280px]">
+        <SheetHeader>
+          <SheetTitle>Menu</SheetTitle>
+        </SheetHeader>
+        <nav className="flex flex-col gap-2 mt-4">
+          {links.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              onClick={modal.dismiss}
+              className={cn(
+                "flex items-center gap-3 px-3 py-2 rounded-md",
+                currentPath === link.href
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-muted"
+              )}
+            >
+              <link.icon className="h-4 w-4" />
+              {link.label}
+            </a>
+          ))}
+        </nav>
+      </SheetContent>
+    </Sheet>
+  );
+});
+```
+
+## Detail Panel
+
+```tsx
+interface ItemDetailProps {
+  item: { id: string; name: string; description: string };
+}
+
+const ItemDetailSheet = ModalManager.create<ItemDetailProps>(({ item }) => {
+  const modal = useModal();
+
+  return (
+    <Sheet {...shadcnUiSheet(modal)}>
+      <SheetContent className="sm:max-w-lg">
+        <SheetHeader>
+          <SheetTitle>{item.name}</SheetTitle>
+          <SheetDescription>Item details</SheetDescription>
+        </SheetHeader>
+        <div className="py-4">
+          <p>{item.description}</p>
+        </div>
+        <SheetFooter>
+          <Button variant="outline" onClick={modal.dismiss}>Close</Button>
+          <Button onClick={() => modal.close({ action: "edit" })}>Edit</Button>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
+  );
+});
+
+// Usage in a list
+const onItemClick = async (item: Item) => {
+  const result = await ModalManager.open(ItemDetailSheet, { data: { item } }).afterClosed();
+
+  if (result?.action === "edit") {
+    // Open edit modal
+  }
+};
+```

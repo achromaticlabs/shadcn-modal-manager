@@ -1,0 +1,5 @@
+{
+	"title": "Shadcn UI",
+	"defaultOpen": false,
+	"pages": ["dialog", "alert-dialog", "sheet", "drawer"]
+}

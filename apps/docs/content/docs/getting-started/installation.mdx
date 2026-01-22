@@ -1,0 +1,46 @@
+---
+title: Installation
+description: How to install Modal Manager
+---
+
+## Package Manager
+
+Install the package using your preferred package manager:
+
+```bash tab="npm"
+npm install shadcn-modal-manager
+```
+
+```bash tab="pnpm"
+pnpm add shadcn-modal-manager
+```
+
+```bash tab="yarn"
+yarn add shadcn-modal-manager
+```
+
+```bash tab="bun"
+bun add shadcn-modal-manager
+```
+
+## Peer Dependencies
+
+Modal Manager requires React 18 or later:
+
+```json
+{
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  }
+}
+```
+
+## UI Library Adapters
+
+Modal Manager works with any UI library. We provide built-in adapters for:
+
+- **Shadcn UI** - `shadcnUiDialog`, `shadcnUiAlertDialog`, `shadcnUiSheet`, `shadcnUiDrawer`
+- **Radix UI** - `radixUiDialog`, `radixUiDialogContent`, `radixUiPopover`, `radixUiSheet`
+- **Base UI** - `baseUiDialog`, `baseUiDialogPortal`, `baseUiDialogPopup`
+
+You'll need to install your UI library of choice separately.

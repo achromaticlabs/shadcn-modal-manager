@@ -1,0 +1,80 @@
+---
+title: State & Data
+description: Managing modal data and configuration state
+---
+
+Modals often need to receive data (props) and maintain configuration state.
+
+## Passing Data
+
+Data is passed via the `data` property in `open()`. This data is completely type-safe if you've defined your modal with generics.
+
+```tsx
+interface UserData { username: string; role: 'admin' | 'user' }
+
+const UserModal = ModalManager.create<UserData>(...);
+
+// Type-safe: Error if properties are missing
+ModalManager.open(UserModal, {
+  data: { username: "jdoe", role: "admin" }
+});
+```
+
+## Accessing Data
+
+Inside the modal, you can access data using two methods:
+
+### 1. Via Props (Recommended)
+
+Data passed to `open()` is spread onto the component as props.
+
+```tsx
+const UserModal = ModalManager.create<UserData>(({ username, role }) => {
+  return <p>User: {username} ({role})</p>;
+});
+```
+
+### 2. Via `useModalData` Hook
+
+Useful for deeply nested components within the modal that need access to the data without prop drilling.
+
+```tsx
+function InnerComponent() {
+  const data = useModalData<UserData>();
+  return <span>{data?.username}</span>;
+}
+```
+
+## Updating Data
+
+You can update the data of an open modal dynamically. This triggers a re-render of the modal component.
+
+```tsx
+const ref = ModalManager.open(ProgressModal, { data: { progress: 0 } });
+
+// Simulate progress
+ref.updateData({ progress: 50 });
+ref.updateData({ progress: 100 });
+```
+
+## Configuration State
+
+You can also pass configuration flags to control modal behavior:
+
+- `disableClose`: Helper to prevent closing via Escape key or backdrop click (requires adapter support).
+- `keepMounted`: Keeps the modal structure in the DOM even after it closes (useful for expensive components).
+
+```tsx
+ModalManager.open(FormModal, {
+  data: { ... },
+  disableClose: true, // User cannot dismiss
+  keepMounted: true   // Persist state after close
+});
+```
+
+To read this config inside a modal:
+
+```tsx
+const config = useModalConfig();
+console.log(config.disableClose);
+```

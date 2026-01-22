@@ -1,0 +1,78 @@
+{
+	"name": "shadcn-modal-manager",
+	"version": "0.9.8",
+	"description": "Lightweight React modal manager with promise-based API. Supports Shadcn UI, Radix UI and Base UI.",
+	"license": "MIT",
+	"type": "module",
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/index.d.ts",
+				"default": "./dist/index.js"
+			},
+			"require": {
+				"types": "./dist/index.d.cts",
+				"default": "./dist/index.cjs"
+			}
+		}
+	},
+	"files": [
+		"dist",
+		"src",
+		"README.md"
+	],
+	"scripts": {
+		"build": "tsup",
+		"dev": "tsup --watch",
+		"typecheck": "tsc --noEmit",
+		"lint": "ultracite check",
+		"lint:fix": "ultracite fix",
+		"test": "vitest run",
+		"prepublishOnly": "npm run build"
+	},
+	"peerDependencies": {
+		"react": ">=18.0.0",
+		"react-dom": ">=18.0.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.3.11",
+		"@testing-library/jest-dom": "^6.9.1",
+		"@testing-library/react": "^16.3.0",
+		"@types/react": "^19.0.0",
+		"@types/react-dom": "^19.0.0",
+		"@vitest/coverage-v8": "^3.2.4",
+		"jsdom": "^27.4.0",
+		"react": "^19.0.0",
+		"react-dom": "^19.0.0",
+		"tsup": "^8.5.0",
+		"typescript": "^5.8.0",
+		"ultracite": "^7.0.10",
+		"vitest": "^3.2.0"
+	},
+	"keywords": [
+		"react",
+		"modal",
+		"dialog",
+		"sheet",
+		"drawer",
+		"radix-ui",
+		"shadcn-ui",
+		"shadcn",
+		"base-ui",
+		"vaul",
+		"promise",
+		"typescript",
+		"hooks"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/achromaticlabs/shadcn-modal-manager.git"
+	},
+	"homepage": "https://shadcn-modal-manager.achromatic.dev",
+	"bugs": {
+		"url": "https://github.com/achromaticlabs/shadcn-modal-manager/issues"
+	}
+}

@@ -1,0 +1,157 @@
+---
+title: ModalManager
+description: The primary namespace for controlling modals
+---
+
+`ModalManager` is the central API for managing modal state. It provides methods to create, open, close, and query modals.
+
+## ModalProvider
+
+The context provider that must wrap your application. It manages the state for all modals.
+
+```tsx
+import { ModalProvider } from "shadcn-modal-manager";
+
+function App() {
+  return (
+    <ModalProvider>
+      <AppContent />
+    </ModalProvider>
+  );
+}
+```
+
+## ModalDefinition
+
+A utility component for declaratively defining modals in your JSX tree. This is useful if you prefer to keep modals close to their trigger context or need to pre-register them with a specific ID.
+
+```tsx
+import { ModalDefinition } from "shadcn-modal-manager";
+
+<ModalDefinition
+  component={MyModal}
+  id="my-modal-id"
+/>
+```
+
+---
+
+## Methods
+
+### create()
+
+HOC (Higher-Order Component) for creating a modal component that interacts with the manager.
+
+```tsx
+function create<TProps, TRef>(
+  Component: ComponentType<TProps & RefProp<TRef>>
+): ComponentType<TProps & ModalHocProps & RefProp<TRef>>
+```
+
+#### Generics
+
+- `TProps`: The props your component accepts (including data passed via `open`).
+- `TRef`: The type of ref your component exposes (optional).
+
+#### Usage
+
+```tsx
+const AlertModal = ModalManager.create<AlertProps>(({ message }) => {
+  const modal = useModal();
+  return (
+    <Dialog {...radixUiDialog(modal)}>
+        <p>{message}</p>
+    </Dialog>
+  );
+});
+```
+
+---
+
+### open()
+
+Opens a modal and returns a reference for controlling it.
+
+```tsx
+function open<TResult = unknown, TData = Record<string, unknown>>(
+  modal: ComponentType | string,
+  config?: ModalConfig<TData>
+): ModalRef<TResult, TData>
+```
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| `modal` | `ComponentType` \| `string` | The modal component (wrapper by `createModal`) or its ID string |
+| `config` | `ModalConfig` | Configuration object |
+
+`ModalConfig` options:
+- `data`: `TData` - Data to pass to the modal
+- `keepMounted`: `boolean` - Keep mounted after closing
+- `modalId`: `string` - Override the modal ID
+- `disableClose`: `boolean` - Prevent closing via escape/backdrop
+
+#### Returns
+
+`ModalRef<TResult, TData>` object with:
+- `modalId`: `string`
+- `close(result?)`: Closes the modal with optional result
+- `afterClosed()`: Promise resolving to the result when closed
+- `afterOpened()`: Promise resolving when animation completes
+- `updateData(data)`: Updates the modal data
+
+---
+
+### close()
+
+Closes a specific modal.
+
+```tsx
+function close<TResult = unknown>(
+  modal: ComponentType | string
+): Promise<TResult>
+```
+
+#### Returns
+Promise resolving when the close animation completes.
+
+---
+
+### closeAll()
+
+Closes all currently open modals.
+
+```tsx
+function closeAll(): Promise<void>
+```
+
+---
+
+### getOpen()
+
+Returns an array of IDs for all currently open modals.
+
+```tsx
+function getOpen(): string[]
+```
+
+---
+
+### hasOpen()
+
+Checks if any modals are currently open.
+
+```tsx
+function hasOpen(): boolean
+```
+
+---
+
+### remove()
+
+Forcefully removes a modal from the DOM. Called automatically after closing unless `keepMounted` is true.
+
+```tsx
+function remove(modal: ComponentType | string): void
+```

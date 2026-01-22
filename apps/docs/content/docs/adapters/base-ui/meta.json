@@ -1,0 +1,5 @@
+{
+	"title": "Base UI",
+	"defaultOpen": false,
+	"pages": ["dialog", "alert-dialog", "popover", "sheet"]
+}

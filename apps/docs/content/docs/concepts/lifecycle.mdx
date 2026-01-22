@@ -1,0 +1,142 @@
+---
+title: Modal Lifecycle
+description: Understanding how modals are created, shown, and destroyed
+---
+
+Modal Manager handles the complete lifecycle of modals, including mounting, visibility transitions, and cleanup.
+
+## Lifecycle States
+
+A modal goes through several states:
+
+```
+[Not Mounted] → ModalManager.open() → [Mounted, isOpen=true] → ModalManager.close() → [Mounted, isOpen=false] → animation ends → [Not Mounted]
+```
+
+### 1. Opening
+
+When you call `ModalManager.open(MyModal, { data })`:
+
+1. The modal component is mounted (if not already)
+2. `isOpen` becomes `true`
+3. The opening animation plays
+4. `afterOpened()` promise resolves
+
+### 2. Closing
+
+When you call `close(result)` or `dismiss()`:
+
+1. `isOpen` becomes `false`
+2. The closing animation plays
+3. You must call `onAnimationEnd()` when the animation completes
+4. `afterClosed()` promise resolves with the result
+5. The modal is unmounted (unless `keepMounted` is true)
+
+## Animation Handling
+
+The library waits for you to signal animation completion before cleanup:
+
+```tsx
+const MyModal = ModalManager.create(() => {
+  const modal = useModal();
+
+  return (
+    <Dialog open={modal.isOpen}>
+      <DialogContent
+        // Call onAnimationEnd when CSS/Framer animations complete
+        onAnimationEnd={modal.onAnimationEnd}
+      >
+        {/* content */}
+      </DialogContent>
+    </Dialog>
+  );
+});
+```
+
+### With Radix UI
+
+Radix fires `onAnimationEndCapture` for both enter and exit animations:
+
+```tsx
+<DialogContent
+  onAnimationEndCapture={modal.onAnimationEnd}
+  onEscapeKeyDown={() => modal.dismiss()}
+  onPointerDownOutside={() => modal.dismiss()}
+>
+```
+
+### With Framer Motion
+
+```tsx
+<motion.div
+  initial={{ opacity: 0 }}
+  animate={{ opacity: modal.isOpen ? 1 : 0 }}
+  onAnimationComplete={modal.onAnimationEnd}
+>
+```
+
+## Keep Mounted
+
+By default, modals are unmounted after closing. Use `keepMounted` to preserve state:
+
+```tsx
+// On the modal definition
+<MyModal modalId="settings" keepMounted />
+
+// Or when opening
+ModalManager.open(MyModal, { keepMounted: true });
+```
+
+This is useful for:
+- Preserving form state between opens
+- Heavy components that are expensive to remount
+- Modals that are frequently toggled
+
+## Promise-based Control
+
+### afterOpened()
+
+Resolves when the opening animation completes:
+
+```tsx
+const ref = ModalManager.open(MyModal);
+await ref.afterOpened();
+// Wait until fully open
+```
+
+### afterClosed()
+
+Resolves when the modal closes, with the result value:
+
+```tsx
+const ref = ModalManager.open(ConfirmModal);
+const confirmed = await ref.afterClosed();
+
+if (confirmed) {
+  await deleteItem();
+}
+```
+
+### beforeClosed()
+
+Resolves when close is initiated (before animation):
+
+```tsx
+const ref = ModalManager.open(MyModal);
+await ref.beforeClosed();
+// Close was triggered, animation is playing
+```
+
+## Cleanup
+
+The library provides cleanup utilities for testing and edge cases:
+
+```tsx
+import { ModalManager } from "shadcn-modal-manager";
+
+// Clean up a specific modal
+ModalManager.cleanup("modal-id");
+
+// Clean up all modals
+ModalManager.cleanupAll();
+```

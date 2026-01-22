@@ -1,0 +1,5 @@
+{
+	"title": "Radix UI",
+	"defaultOpen": false,
+	"pages": ["dialog", "alert-dialog", "popover", "sheet"]
+}

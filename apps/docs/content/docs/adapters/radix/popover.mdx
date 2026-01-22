@@ -1,0 +1,125 @@
+---
+title: radixUiPopover
+description: Adapter for Radix UI Popover component
+---
+
+The `radixUiPopover` adapter works with [@radix-ui/react-popover](https://www.radix-ui.com/primitives/docs/components/popover).
+
+Popovers are lightweight overlays anchored to a trigger element, typically without exit animations.
+
+
+## Usage
+
+```tsx
+import { Popover, PopoverTrigger, PopoverContent } from "@radix-ui/react-popover";
+import { ModalManager, useModal, radixUiPopover } from "shadcn-modal-manager";
+
+const MenuPopover = ModalManager.create(() => {
+  const modal = useModal();
+
+  return (
+    <Popover {...radixUiPopover(modal)}>
+      <PopoverTrigger asChild>
+        <button>Open Menu</button>
+      </PopoverTrigger>
+      <PopoverContent>
+        <nav>
+          <a href="/profile">Profile</a>
+          <a href="/settings">Settings</a>
+          <button onClick={modal.dismiss}>Close</button>
+        </nav>
+      </PopoverContent>
+    </Popover>
+  );
+});
+```
+
+## API
+
+### radixUiPopover
+
+Returns props for the `Popover` root component.
+
+```tsx
+const props = radixUiPopover(modal, options?);
+```
+
+**Returns:**
+| Prop | Type | Description |
+|------|------|-------------|
+| `open` | `boolean` | Whether the popover is visible |
+| `onOpenChange` | `(open: boolean) => void` | Called when open state changes |
+
+## No Exit Animation
+
+Unlike Dialog, Popover typically doesn't have exit animations. The adapter handles this by calling `onAnimationEnd` immediately when closing:
+
+```tsx
+// Inside radixUiPopover adapter
+onOpenChange: (open: boolean) => {
+  if (!open && !options?.disableClose) {
+    modal.dismiss();
+    modal.onAnimationEnd(); // Called immediately
+  }
+}
+```
+
+This means `afterClosed()` resolves as soon as the popover closes.
+
+## Controlled Popover
+
+For programmatic control outside the trigger:
+
+```tsx
+const ControlledPopover = ModalManager.create(() => {
+  const modal = useModal();
+
+  return (
+    <Popover {...radixUiPopover(modal)}>
+      {/* No trigger - controlled externally */}
+      <PopoverContent>
+        <p>This popover is controlled externally</p>
+        <button onClick={modal.dismiss}>Close</button>
+      </PopoverContent>
+    </Popover>
+  );
+});
+
+// Open programmatically
+ModalManager.open(ControlledPopover);
+```
+
+## With Anchor
+
+Anchor the popover to a specific element:
+
+```tsx
+import { Popover, PopoverContent, PopoverAnchor } from "@radix-ui/react-popover";
+
+const AnchoredPopover = ModalManager.create<{ anchorRef: RefObject<HTMLElement> }>(
+  ({ anchorRef }) => {
+    const modal = useModal();
+
+    return (
+      <Popover {...radixUiPopover(modal)}>
+        <PopoverAnchor virtualRef={anchorRef} />
+        <PopoverContent>
+          <p>Anchored content</p>
+        </PopoverContent>
+      </Popover>
+    );
+  }
+);
+```
+
+## Options
+
+```tsx
+interface AdapterOptions {
+  disableClose?: boolean;
+}
+```
+
+When `disableClose` is `true`:
+- `onOpenChange(false)` is ignored
+- User cannot close by clicking outside or pressing escape

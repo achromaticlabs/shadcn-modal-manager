@@ -1,0 +1,195 @@
+---
+title: shadcnUiDialog
+description: Adapter for Shadcn UI Dialog component
+---
+
+The `shadcnUiDialog` and `shadcnUiDialogContent` adapters work with [Shadcn UI's Dialog](https://ui.shadcn.com/docs/components/dialog) component.
+
+Shadcn UI is built on Radix primitives with pre-styled, customizable components.
+
+
+
+## Usage
+
+```tsx
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { ModalManager, useModal, shadcnUiDialog, shadcnUiDialogContent } from "shadcn-modal-manager";
+
+const EditProfileModal = ModalManager.create(() => {
+  const modal = useModal();
+
+  return (
+    <Dialog {...shadcnUiDialog(modal)}>
+      <DialogContent {...shadcnUiDialogContent(modal)}>
+        <DialogHeader>
+          <DialogTitle>Edit Profile</DialogTitle>
+          <DialogDescription>
+            Make changes to your profile here.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          {/* Form fields */}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={modal.dismiss}>
+            Cancel
+          </Button>
+          <Button onClick={() => modal.close({ saved: true })}>
+            Save changes
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+});
+```
+
+## API
+
+### shadcnUiDialog
+
+Returns all props needed for both Dialog and DialogContent.
+
+```tsx
+const props = shadcnUiDialog(modal, options?);
+```
+
+**Returns:**
+| Prop | Type | Description |
+|------|------|-------------|
+| `open` | `boolean` | Whether the dialog is visible |
+| `onOpenChange` | `(open: boolean) => void` | For Dialog root |
+| `onClose` | `() => void` | For DialogContent close button |
+| `onAnimationEndCapture` | `() => void` | For DialogContent animations |
+
+### shadcnUiDialogContent
+
+Returns all props needed for DialogContent.
+
+```tsx
+const props = shadcnUiDialogContent(modal, options?);
+```
+
+## Spreading Props
+
+```tsx
+const MyModal = ModalManager.create(() => {
+  const modal = useModal();
+
+  return (
+    <Dialog {...shadcnUiDialog(modal)}>
+      <DialogContent {...shadcnUiDialogContent(modal)}>
+        {/* content */}
+      </DialogContent>
+    </Dialog>
+  );
+});
+```
+
+## With Form
+
+```tsx
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
+const schema = z.object({
+  name: z.string().min(1),
+  email: z.string().email(),
+});
+
+type FormData = z.infer<typeof schema>;
+
+interface EditUserProps {
+  user: { name: string; email: string };
+}
+
+const EditUserModal = ModalManager.create<EditUserProps>(({ user }) => {
+  const modal = useModal();
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: user,
+  });
+
+  const onSubmit = (data: FormData) => {
+    modal.close(data);
+  };
+
+  return (
+    <Dialog {...shadcnUiDialog(modal)}>
+      <DialogContent {...shadcnUiDialogContent(modal)}>
+        <DialogHeader>
+          <DialogTitle>Edit User</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <div className="grid gap-4 py-4">
+            <Input {...form.register("name")} placeholder="Name" />
+            <Input {...form.register("email")} placeholder="Email" />
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={modal.dismiss}>
+              Cancel
+            </Button>
+            <Button type="submit">Save</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+});
+
+// Usage
+const updatedUser = await ModalManager.open(EditUserModal, {
+  data: { user: { name: "John", email: "john@example.com" } }
+}).afterClosed();
+
+if (updatedUser) {
+  await updateUser(updatedUser);
+}
+```
+
+## Prevent Close During Submission
+
+```tsx
+const FormModal = ModalManager.create(() => {
+  const modal = useModal();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      await saveData();
+      modal.close(true);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog {...shadcnUiDialog(modal, { disableClose: isSubmitting })}>
+      <DialogContent {...shadcnUiDialogContent(modal, { disableClose: isSubmitting })}>
+        <DialogHeader>
+          <DialogTitle>Submit Form</DialogTitle>
+        </DialogHeader>
+        <DialogFooter>
+          <Button disabled={isSubmitting} onClick={modal.dismiss}>
+            Cancel
+          </Button>
+          <Button disabled={isSubmitting} onClick={handleSubmit}>
+            {isSubmitting ? "Submitting..." : "Submit"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+});
+```

@@ -1,0 +1,150 @@
+---
+title: Quick Start
+description: Get up and running with Modal Manager in minutes
+---
+
+## 1. Set Up the Provider
+
+Wrap your application with `ModalProvider`:
+
+```tsx
+import { ModalProvider } from "shadcn-modal-manager";
+
+function App() {
+  return (
+    <ModalProvider>
+      <YourApp />
+    </ModalProvider>
+  );
+}
+```
+
+## 2. Create a Modal
+
+Use `ModalManager.create` to define a modal component. The modal receives props via the `data` option when opened:
+
+```tsx
+import { ModalManager, useModal, shadcnUiDialog, shadcnUiDialogContent } from "shadcn-modal-manager";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+
+interface EditUserModalProps {
+  userId: string;
+  userName: string;
+}
+
+export const EditUserModal = ModalManager.create<EditUserModalProps>(
+  ({ userId, userName }) => {
+    const modal = useModal();
+
+    const handleSave = async (e: React.FormEvent) => {
+      e.preventDefault();
+      await saveUser(userId);
+      modal.close({ saved: true });
+    };
+
+    return (
+      <Dialog {...shadcnUiDialog(modal)}>
+        <DialogContent {...shadcnUiDialogContent(modal)}>
+          <DialogHeader>
+            <DialogTitle>Edit {userName}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSave} className="space-y-4">
+            {/* form fields */}
+            <div className="p-4 border rounded">Form Content</div>
+            
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={modal.dismiss}>
+                Cancel
+              </Button>
+              <Button type="submit">Save</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+);
+```
+
+## 3. Open the Modal
+
+Use `ModalManager.open()` to show the modal from anywhere in your app:
+
+```tsx
+import { ModalManager } from "shadcn-modal-manager";
+import { EditUserModal } from "./edit-user-modal";
+
+function UserList() {
+  const handleEdit = async (user) => {
+    const modalRef = ModalManager.open(EditUserModal, {
+      data: { userId: user.id, userName: user.name }
+    });
+
+    const result = await modalRef.afterClosed();
+
+    if (result?.saved) {
+      refetch();
+    }
+  };
+
+  return (
+    <ul>
+      {users.map((user) => (
+        <li key={user.id}>
+          {user.name}
+          <button onClick={() => handleEdit(user)}>Edit</button>
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+## Key Concepts
+
+### Modal Handler
+
+Inside a modal, `useModal()` returns a handler with:
+
+**State:**
+- `modalId` - The modal's unique identifier
+- `data` - Data passed via `ModalManager.open()`
+- `isOpen` - Whether the modal is open
+- `keepMounted` - Whether to keep mounted after close
+
+**Controls:**
+- `open(data?)` - Open this modal (useful for nested modals)
+- `close(result?)` - Close with a result value
+- `dismiss()` - Close without a result
+- `remove()` - Force remove from the store
+
+**Animation:**
+- `onAnimationEnd()` - Call when exit animation completes
+
+### Adapters
+
+Adapters translate the modal handler into props for your UI library:
+
+```tsx
+// The adapter handles onOpenChange, animation callbacks, etc.
+<Dialog {...shadcnUiDialog(modal)}>
+  <DialogContent {...shadcnUiDialogContent(modal)}>
+    {/* content */}
+  </DialogContent>
+</Dialog>
+```
+
+### Promise-based Control
+
+`ModalManager.open()` returns a `ModalRef` with promise methods:
+
+```tsx
+const ref = ModalManager.open(MyModal, { data: { ... } });
+
+// Wait for the modal to finish opening animation
+await ref.afterOpened();
+
+// Wait for the modal to close and get the result
+const result = await ref.afterClosed();
+```

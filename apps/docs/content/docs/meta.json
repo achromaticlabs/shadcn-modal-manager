@@ -1,0 +1,21 @@
+{
+	"title": "Documentation",
+	"pages": [
+		"---Getting Started---",
+		"getting-started/introduction",
+		"getting-started/installation",
+		"getting-started/quickstart",
+		"---Core Concepts---",
+		"concepts/defining-modals",
+		"concepts/control-flow",
+		"concepts/state-management",
+		"concepts/lifecycle",
+		"---Adapters---",
+		"adapters/shadcn",
+		"adapters/radix",
+		"adapters/base-ui",
+		"---API Reference---",
+		"api/modal-manager",
+		"api/hooks"
+	]
+}

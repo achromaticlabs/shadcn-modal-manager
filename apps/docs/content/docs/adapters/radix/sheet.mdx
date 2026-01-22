@@ -1,0 +1,195 @@
+---
+title: radixUiSheet
+description: Adapter for Radix UI Sheet (side panel) component
+---
+
+The `radixUiSheet` and `radixUiSheetContent` adapters work with Radix UI's Dialog component styled as a side panel.
+
+Sheets slide in from the edge of the screen, commonly used for navigation, settings, or detail panels.
+
+
+## Usage
+
+```tsx
+import { Dialog, DialogPortal, DialogOverlay, DialogContent, DialogTitle } from "@radix-ui/react-dialog";
+import { ModalManager, useModal, radixUiSheet, radixUiSheetContent } from "shadcn-modal-manager";
+
+const SettingsSheet = ModalManager.create(() => {
+  const modal = useModal();
+
+  return (
+    <Dialog {...radixUiSheet(modal)}>
+      <DialogPortal>
+        <DialogOverlay className="fixed inset-0 bg-black/50" />
+        <DialogContent
+          {...radixUiSheetContent(modal)}
+          className="fixed right-0 top-0 h-full w-[400px] bg-white p-6"
+        >
+          <DialogTitle>Settings</DialogTitle>
+          <div className="mt-4">
+            {/* Settings content */}
+          </div>
+          <button onClick={modal.dismiss}>Close</button>
+        </DialogContent>
+      </DialogPortal>
+    </Dialog>
+  );
+});
+```
+
+## API
+
+### radixUiSheet
+
+Returns props for the `Dialog` root component.
+
+```tsx
+const props = radixUiSheet(modal, options?);
+```
+
+**Returns:**
+| Prop | Type | Description |
+|------|------|-------------|
+| `open` | `boolean` | Whether the sheet is visible |
+| `onOpenChange` | `(open: boolean) => void` | Called when open state changes |
+
+### radixUiSheetContent
+
+Returns props for the content.
+
+```tsx
+const props = radixUiSheetContent(modal, options?);
+```
+
+**Returns:**
+| Prop | Type | Description |
+|------|------|-------------|
+| `onAnimationEndCapture` | `() => void` | Signals animation completion |
+| `onEscapeKeyDown` | `(e?: Event) => void` | Handles escape key |
+| `onPointerDownOutside` | `(e?: Event) => void` | Handles outside click |
+
+## Sheet Positions
+
+Style the sheet to slide from different edges:
+
+```css
+/* Right side (default) */
+.sheet-right {
+  position: fixed;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 400px;
+}
+
+.sheet-right[data-state="open"] {
+  animation: slideInRight 200ms ease-out;
+}
+
+.sheet-right[data-state="closed"] {
+  animation: slideOutRight 200ms ease-in;
+}
+
+/* Left side */
+.sheet-left {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 400px;
+}
+
+/* Bottom */
+.sheet-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: auto;
+  max-height: 80vh;
+}
+
+/* Top */
+.sheet-top {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: auto;
+  max-height: 80vh;
+}
+```
+
+## Navigation Drawer Example
+
+```tsx
+interface NavDrawerProps {
+  currentPath: string;
+}
+
+const NavDrawer = ModalManager.create<NavDrawerProps>(({ currentPath }) => {
+  const modal = useModal();
+
+  const navItems = [
+    { href: "/", label: "Home" },
+    { href: "/products", label: "Products" },
+    { href: "/about", label: "About" },
+    { href: "/contact", label: "Contact" },
+  ];
+
+  return (
+    <Dialog {...radixUiSheet(modal)}>
+      <DialogPortal>
+        <DialogOverlay className="fixed inset-0 bg-black/50" />
+        <DialogContent
+          {...radixUiSheetContent(modal)}
+          className="fixed left-0 top-0 h-full w-[280px] bg-white"
+        >
+          <DialogTitle className="sr-only">Navigation</DialogTitle>
+          <nav className="p-4">
+            {navItems.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className={currentPath === item.href ? "font-bold" : ""}
+                onClick={modal.dismiss}
+              >
+                {item.label}
+              </a>
+            ))}
+          </nav>
+        </DialogContent>
+      </DialogPortal>
+    </Dialog>
+  );
+});
+```
+
+## Mobile-First Sheet
+
+```tsx
+const ResponsiveSheet = ModalManager.create(() => {
+  const modal = useModal();
+
+  return (
+    <Dialog {...radixUiSheet(modal)}>
+      <DialogPortal>
+        <DialogOverlay className="fixed inset-0 bg-black/50" />
+        <DialogContent
+          {...radixUiSheetContent(modal)}
+          className="
+            fixed bg-white
+            /* Mobile: bottom sheet */
+            bottom-0 left-0 right-0 h-auto max-h-[80vh] rounded-t-xl
+            /* Desktop: right sheet */
+            md:bottom-auto md:top-0 md:right-0 md:left-auto
+            md:h-full md:w-[400px] md:rounded-none
+          "
+        >
+          {/* Content */}
+        </DialogContent>
+      </DialogPortal>
+    </Dialog>
+  );
+});
+```
