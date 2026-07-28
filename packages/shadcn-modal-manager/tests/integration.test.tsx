@@ -6,13 +6,15 @@
  */
 import {
 	act,
+	fireEvent,
 	render,
 	screen,
 	waitForElementToBeRemoved,
 } from "@testing-library/react";
 import type { ReactNode } from "react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { baseUiDialog } from "../src/adapters";
 import { ModalDefinition, ModalProvider } from "../src/context";
 import {
 	ALREADY_MOUNTED,
@@ -99,6 +101,34 @@ const HocTestModal = ModalManager.create<{ name?: string }>(
 );
 
 describe("Full Modal Lifecycle", () => {
+	it("resolves the first afterClosed promise with an internal close result", async () => {
+		const ResultModal = ModalManager.create(() => {
+			const modal = useModal();
+
+			return modal.isOpen ? (
+				<button
+					data-testid="save-result"
+					onClick={() => modal.close("saved")}
+					type="button"
+				>
+					Save
+				</button>
+			) : null;
+		});
+
+		render(<ModalProvider />);
+
+		let modalRef!: ReturnType<typeof ModalManager.open<string>>;
+		act(() => {
+			modalRef = ModalManager.open<string>(ResultModal);
+		});
+		const afterClosed = modalRef.afterClosed();
+
+		fireEvent.click(screen.getByTestId("save-result"));
+
+		await expect(afterClosed).resolves.toBe("saved");
+	});
+
 	it("open renders modal, close removes it after animation", async () => {
 		ModalManager.register("test-modal", HocTestModal);
 		render(<ModalProvider />);
@@ -146,6 +176,48 @@ describe("Full Modal Lifecycle", () => {
 		});
 
 		await waitForElementToBeRemoved(() => screen.queryByTestId("test-modal"));
+	});
+
+	it("unmounts Base UI modal content after transition completion", () => {
+		let rootProps!: ReturnType<typeof baseUiDialog>;
+
+		const StatefulModal = ModalManager.create(() => {
+			const modal = useModal();
+			const [count, setCount] = useState(0);
+			rootProps = baseUiDialog(modal);
+
+			return (
+				<button
+					data-testid="stateful-modal"
+					onClick={() => setCount((value) => value + 1)}
+					type="button"
+				>
+					{count}
+				</button>
+			);
+		});
+
+		render(<ModalProvider />);
+
+		act(() => {
+			ModalManager.open(StatefulModal);
+		});
+		fireEvent.click(screen.getByTestId("stateful-modal"));
+		expect(screen.getByTestId("stateful-modal")).toHaveTextContent("1");
+
+		const closingRootProps = rootProps;
+		act(() => {
+			closingRootProps.onOpenChange(false);
+		});
+		act(() => {
+			closingRootProps.onOpenChangeComplete(false);
+		});
+		expect(screen.queryByTestId("stateful-modal")).not.toBeInTheDocument();
+
+		act(() => {
+			ModalManager.open(StatefulModal);
+		});
+		expect(screen.getByTestId("stateful-modal")).toHaveTextContent("0");
 	});
 });
 

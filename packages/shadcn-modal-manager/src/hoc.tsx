@@ -83,9 +83,12 @@ export const createModal = <
 		const delayOpen = modals[modalId]?.delayOpen;
 		useEffect(() => {
 			if (delayOpen) {
-				openModal(data);
+				setFlags(modalId, {
+					delayOpen: false,
+					isOpen: true,
+				});
 			}
-		}, [delayOpen, data, openModal]);
+		}, [delayOpen, modalId]);
 
 		if (!shouldMount) {
 			return null;

@@ -384,6 +384,7 @@ export const radixUiPopover = (
 export interface BaseUiDialogRootProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
+	onOpenChangeComplete: (open: boolean) => void;
 	dismissible?: boolean;
 }
 
@@ -413,6 +414,9 @@ export const baseUiDialog = (
 		if (!(open || options?.disableClose)) {
 			modal.dismiss();
 		}
+	},
+	onOpenChangeComplete: () => {
+		modal.onAnimationEnd();
 	},
 	dismissible: !options?.disableClose,
 });
@@ -450,6 +454,9 @@ export const baseUiAlertDialog = (
 			modal.dismiss();
 		}
 	},
+	onOpenChangeComplete: () => {
+		modal.onAnimationEnd();
+	},
 	dismissible: !options?.disableClose,
 });
 
@@ -479,6 +486,7 @@ export const baseUiAlertDialogPopup = (
 export interface BaseUiPopoverRootProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
+	onOpenChangeComplete: (open: boolean) => void;
 }
 
 /**
@@ -507,6 +515,9 @@ export const baseUiPopover = (
 		if (!(open || options?.disableClose)) {
 			modal.dismiss();
 		}
+	},
+	onOpenChangeComplete: () => {
+		modal.onAnimationEnd();
 	},
 });
 
@@ -542,6 +553,9 @@ export const baseUiSheet = (
 		if (!(open || options?.disableClose)) {
 			modal.dismiss();
 		}
+	},
+	onOpenChangeComplete: () => {
+		modal.onAnimationEnd();
 	},
 	dismissible: !options?.disableClose,
 });

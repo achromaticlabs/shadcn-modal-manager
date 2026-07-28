@@ -289,19 +289,15 @@ export function openModal<TResult = unknown, TData = Record<string, unknown>>(
 		},
 
 		afterOpened: () => {
-			return openedCallbacks[modalId]?.promise ?? Promise.resolve();
+			return openedDeferred.promise;
 		},
 
 		afterClosed: () => {
-			// Return stored promise that persists even after close() is called
-			return (closedPromises[modalId] ?? Promise.resolve(undefined)) as Promise<
-				TResult | undefined
-			>;
+			return mainCallbacks.promise as Promise<TResult | undefined>;
 		},
 
 		beforeClosed: () => {
-			return (beforeClosedCallbacks[modalId]?.promise ??
-				Promise.resolve(undefined)) as Promise<TResult | undefined>;
+			return beforeClosedDeferred.promise as Promise<TResult | undefined>;
 		},
 
 		updateData: (newData: Partial<TData>) => {

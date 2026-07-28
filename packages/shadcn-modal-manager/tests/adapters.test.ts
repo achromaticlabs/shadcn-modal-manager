@@ -343,6 +343,15 @@ describe("Base UI Adapters", () => {
 			).toBe(false);
 		});
 
+		it("notifies the modal when Base UI finishes a state change", () => {
+			const handler = createHandler();
+			const props = baseUiDialog(handler);
+
+			props.onOpenChangeComplete(false);
+
+			expect(handler.onAnimationEnd).toHaveBeenCalledOnce();
+		});
+
 		it("portal maps keepMounted from modal", () => {
 			const { baseUiDialogPortal } = __importAdapters();
 			expect(
@@ -399,6 +408,15 @@ describe("Base UI Adapters", () => {
 			expect(handler.dismiss).toHaveBeenCalled();
 		});
 
+		it("notifies the modal when Base UI finishes a state change", () => {
+			const handler = createHandler();
+			const props = baseUiPopover(handler);
+
+			props.onOpenChangeComplete(false);
+
+			expect(handler.onAnimationEnd).toHaveBeenCalledOnce();
+		});
+
 		it("portal maps keepMounted from modal", () => {
 			const { baseUiPopoverPortal } = __importAdapters();
 			expect(
@@ -420,6 +438,15 @@ describe("Base UI Adapters", () => {
 			expect(
 				baseUiSheet(createHandler(), { disableClose: true }).dismissible,
 			).toBe(false);
+		});
+
+		it("notifies the modal when Base UI finishes a state change", () => {
+			const handler = createHandler();
+			const props = baseUiSheet(handler);
+
+			props.onOpenChangeComplete(false);
+
+			expect(handler.onAnimationEnd).toHaveBeenCalledOnce();
 		});
 
 		it("portal maps keepMounted from modal", () => {
